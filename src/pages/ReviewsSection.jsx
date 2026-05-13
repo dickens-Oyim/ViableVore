@@ -33,4 +33,22 @@ const ReviewsSection = ({ movieId }) => {
   );
 };
 
+const ReviewsSection = ({ movieId }) => {
+  const [reviews, setReviews] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getReviews();
+
+      const filtered = data.filter(
+        (r) => r.movieId === movieId
+      );
+
+      setReviews(filtered);
+    };
+
+    fetchData();
+  }, [movieId]);
+
+};
 export default ReviewsSection;

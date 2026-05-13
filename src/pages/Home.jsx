@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchMovieTrailer } from "../api/movieApi";
 import axios from "axios";
+import { searchMovies } from "../services/movieService";
 
 function Home({ onSelectMovie }) {
   const [movies, setMovies] = useState([]);
@@ -34,6 +35,9 @@ function Home({ onSelectMovie }) {
 
     fetchAllMovies();
   }, []);
+
+  
+
 
   //  Search movies
   const handleSearch = async (e) => {
