@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 
 import Home from "./pages/Home";
 import MovieDetails from "./pages/MovieDetails";
@@ -8,56 +8,57 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./pages/ProtectedRoute";
 
+import "./App.css";
+
 function App() {
   return (
-    <BrowserRouter>
-      <div>
-        <h1>ViableVore</h1>
+    <Router>
+      <div className="app">
+        {/* Header/Navbar */}
+        <header className="navbar">
+          <h1 className="logo">ViableVore</h1>
 
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/favorites">Favorites</Link>
-          <Link to="/login">Login</Link>
-          <Link to="/register">Register</Link>
-          <Link to="/dashboard">Dashboard</Link>
-        </nav>
+          <nav>
+            <Link to="/">Home</Link>
+            <Link to="/favorites">Favorites</Link>
+            <Link to="/login">Login</Link>
+            <Link to="/register">Register</Link>
+            <Link to="/dashboard">Dashboard</Link>
+          </nav>
+        </header>
 
-        <Routes>
-          <Route path="/" element={<Home />} />
+        {/* Main Content */}
+        <main>
+          <Routes>
+            {/* Home */}
+            <Route path="/" element={<Home />} />
 
-          <Route
-            path="/movie/:id"
-            element={<MovieDetails />}
-          />
+            {/* Movie Details */}
+            <Route path="/movie/:id" element={<MovieDetails />} />
 
-          <Route
-            path="/favorites"
-            element={<Favorites />}
-          />
+            {/* Favorites */}
+            <Route path="/favorites" element={<Favorites />} />
 
-          <Route
-            path="/login"
-            element={<Login />}
-          />
+            {/* Login */}
+            <Route path="/login" element={<Login />} />
 
-          <Route
-            path="/register"
-            element={<Register />}
-          />
+            {/* Register */}
+            <Route path="/register" element={<Register />} />
 
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+            {/* Protected Dashboard */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </main>
       </div>
-    </BrowserRouter>
+    </Router>
   );
 }
 
 export default App;
-
