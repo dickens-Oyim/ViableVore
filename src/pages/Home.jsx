@@ -3,36 +3,41 @@ import { fetchMovieTrailer } from "../api/movieApi";
 import axios from "axios";
 import { searchMovies } from "../services/movieService";
 
-function Home({ onSelectMovie }) {
+function Home() {
+  // State to store movies fetched from TMDB
   const [movies, setMovies] = useState([]);
+  // State to store search query input
   const [query, setQuery] = useState("");
+  // State to store trailers keyed by movie ID
   const [trailers, setTrailers] = useState({});
 
-  // Fetch all movies (discover endpoint)
+  // Runs once when component mounts
   useEffect(() => {
     const fetchAllMovies = async () => {
-      const res = await axios.get(
-        "https://api.themoviedb.org/3/discover/movie",
-        {
-          headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_TMDB_READ_TOKEN}`,
-          },
-        }
-      );
+      // Fetch movies from TMDB discover endpoint
+      const res = await axios.get("https://api.themoviedb.org/3/discover/movie", {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_TMDB_READ_TOKEN}`,
+        },
+      });
       setMovies(res.data.results);
 
-      // Fetch trailers for first few movies
+      // Prepare object to store trailers
       const trailerData = {};
-      for (const m of res.data.results.slice(0, 30)) {
+      // Loop through first 6 movies (limit for performance)
+      for (const m of res.data.results.slice(0, 6)) {
+        // Fetch video list for each movie
         const videos = await fetchMovieTrailer(m.id);
+        // Find a trailer hosted on YouTube or Vimeo
         const trailer = videos.find(
-          (v) => v.type === "Trailer" && v.site === "YouTube"
+          (v) => v.type === "Trailer" && (v.site === "YouTube" || v.site === "Vimeo")
         );
-        if (trailer) trailerData[m.id] = trailer.key;
+        // If found, store trailer key and site by movie ID
+        if (trailer) trailerData[m.id] = { key: trailer.key, site: trailer.site };
       }
+      // Save trailers in state
       setTrailers(trailerData);
     };
-
     fetchAllMovies();
   }, []);
 
@@ -43,7 +48,7 @@ function Home({ onSelectMovie }) {
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!query) return;
-
+    // Fetch movies matching search query
     const res = await axios.get(
       `https://api.themoviedb.org/3/search/movie?query=${query}`,
       {
@@ -56,10 +61,10 @@ function Home({ onSelectMovie }) {
   };
 
   return (
-    <div>
-      <h1>Movies</h1>
-
-      <form onSubmit={handleSearch}>
+    <div className="home">
+      <h2>Movies</h2>
+      {/* Search bar */}
+      <form onSubmit={handleSearch} className="search-bar">
         <input
           type="text"
           placeholder="Search movies..."
@@ -69,29 +74,46 @@ function Home({ onSelectMovie }) {
         <button type="submit">Search</button>
       </form>
 
+      {/* Movie grid */}
       <div className="movie-grid">
         {movies.map((movie) => (
-          <div
-            key={movie.id}
-            className="movie-card"
-            onClick={() => onSelectMovie(movie.id)}
-          >
+          <div key={movie.id} className="movie-card">
+            {/* Poster */}
             <img
-              src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`}
+              src={`https://image.tmdb.org/t/p/w300${movie.poster_path}`}
               alt={movie.title}
             />
             <p>{movie.title}</p>
 
-            {/*  Trailer preview */}
+            {/* Trailer embed if available */}
             {trailers[movie.id] && (
-              <iframe
-                width="200"
-                height="120"
-                src={`https://www.youtube.com/embed/${trailers[movie.id]}`}
-                title="Trailer"
-                frameBorder="0"
-                allowFullScreen
-              ></iframe>
+              <div className="trailer-container">
+                {trailers[movie.id].site === "YouTube" ? (
+                  <iframe
+                    width="100%"
+                    height="250"
+                    src={`https://www.youtube.com/embed/${trailers[movie.id].key}`}
+                    title="Trailer"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                ) : trailers[movie.id].site === "Vimeo" ? (
+                  <iframe
+                    width="100%"
+                    height="250"
+                    src={`https://player.vimeo.com/video/${trailers[movie.id].key}`}
+                    title="Trailer"
+                    frameBorder="0"
+                    allow="autoplay; fullscreen"
+                    allowFullScreen
+                  ></iframe>
+                ) : (
+                  <video width="100%" height="250" controls>
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+              </div>
             )}
           </div>
         ))}
