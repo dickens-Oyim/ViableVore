@@ -112,6 +112,35 @@ function Home() {
             />
 
             <p>{movie.title}</p>
+              <button
+                className="favorite-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  const savedMovies =
+                    JSON.parse(localStorage.getItem("favorites")) || [];
+
+                  const alreadyExists = savedMovies.find(
+                    (m) => m.id === movie.id
+                  );
+
+                  if (alreadyExists) {
+                    alert("Movie already in favorites");
+                    return;
+                  }
+
+                  const updatedFavorites = [...savedMovies, movie];
+
+                  localStorage.setItem(
+                    "favorites",
+                    JSON.stringify(updatedFavorites)
+                  );
+
+                  alert("Added to favorites!");
+                }}
+                >
+                Add to Favorites
+              </button>
 
             {/* Trailer */}
             {trailers[movie.id] && (

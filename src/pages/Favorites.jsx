@@ -1,42 +1,59 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function Favorites() {
-  // State to hold the list of favorite movies
   const [favorites, setFavorites] = useState([]);
 
-  // Function to remove a movie from favorites by its ID
+  useEffect(() => {
+    const savedMovies =
+      JSON.parse(localStorage.getItem("favorites")) || [];
+
+    setFavorites(savedMovies);
+  }, []);
+
   const removeFavorite = (id) => {
-    // Filter out the movie with the matching ID
-    setFavorites(favorites.filter((movie) => movie.id !== id));
+    const updatedFavorites = favorites.filter(
+      (movie) => movie.id !== id
+    );
+
+    setFavorites(updatedFavorites);
+
+    localStorage.setItem(
+      "favorites",
+      JSON.stringify(updatedFavorites)
+    );
   };
 
   return (
-    <div>
-      
+    <div className="favorites-page">
       <h2>My Favorites</h2>
-      <img
-        src={
-          movie.poster_path
-            ? `https://image.tmdb.org/t/p/w200${movie.poster_path}`
-            : "https://via.placeholder.com/200x300?text=No+Image"
-        }
-        alt={movie.title}
-      />
 
-      {/* Conditional rendering: show message if no favorites */}
-      {favorites.length === 0 ? (
-        <p>No favorites yet.</p>
-      ) : (
-        // Loop through favorites and display each movie
-        favorites.map((movie) => (
-          <div key={movie.id}>
-            {/* Movie title */}
-            <p>{movie.title}</p>
-            {/* Remove button */}
-            <button onClick={() => removeFavorite(movie.id)}>Remove</button>
-          </div>
-        ))
-      )}
+      <div className="movie-grid">
+        {favorites.length === 0 ? (
+          <p>No favorites yet.</p>
+        ) : (
+          favorites.map((movie) => (
+            <div key={movie.id} className="movie-card">
+              <img
+                src={
+                  movie.poster_path
+                    ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
+                    : "https://via.placeholder.com/300x450?text=No+Image"
+                }
+                alt={movie.title}
+              />
+
+              <p>{movie.title}</p>
+
+              <button
+                className="favorite-btn"
+                onClick={() => removeFavorite(movie.id)}
+              >
+                Remove
+              </button>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
