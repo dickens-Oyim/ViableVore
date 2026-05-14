@@ -14,6 +14,14 @@ function Favorites() {
     <div>
       
       <h2>My Favorites</h2>
+      <img
+        src={
+          movie.poster_path
+            ? `https://image.tmdb.org/t/p/w200${movie.poster_path}`
+            : "https://via.placeholder.com/200x300?text=No+Image"
+        }
+        alt={movie.title}
+      />
 
       {/* Conditional rendering: show message if no favorites */}
       {favorites.length === 0 ? (

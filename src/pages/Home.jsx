@@ -2,15 +2,18 @@ import { useEffect, useState } from "react";
 import { fetchMovieTrailer } from "../api/movieApi";
 import axios from "axios";
 import { searchMovies } from "../services/movieService";
+import { useNavigate } from "react-router-dom";
 
 function Home({ onSelectMovie }) {
   const [movies, setMovies] = useState([]);
   const [query, setQuery] = useState("");
   const [trailers, setTrailers] = useState({});
+  const navigate = useNavigate();
 
   // Fetch all movies (discover endpoint)
   useEffect(() => {
     const fetchAllMovies = async () => {
+         
       const res = await axios.get(
         "https://api.themoviedb.org/3/discover/movie",
         {
@@ -74,12 +77,16 @@ function Home({ onSelectMovie }) {
           <div
             key={movie.id}
             className="movie-card"
-            onClick={() => onSelectMovie(movie.id)}
+            onClick={() => navigate(`/movie/${movie.id}`)}
           >
             <img
-              src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`}
-              alt={movie.title}
-            />
+               src={
+                    movie.poster_path
+                      ? `https://image.tmdb.org/t/p/w200${movie.poster_path}`
+                      : "https://via.placeholder.com/200x300?text=No+Image"
+                  }
+                  alt={movie.title}
+                />
             <p>{movie.title}</p>
 
             {/*  Trailer preview */}

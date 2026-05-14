@@ -40,7 +40,11 @@ function MovieDetails() {
       {/* Movie details */}
       <h2>{movie.title}</h2>
       <img
-        src={`https://image.tmdb.org/t/p/w300${movie.poster_path}`}
+        src={
+          movie.poster_path
+            ? `https://image.tmdb.org/t/p/w200${movie.poster_path}`
+            : "https://via.placeholder.com/200x300?text=No+Image"
+        }
         alt={movie.title}
       />
       <p>{movie.overview}</p>

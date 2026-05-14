@@ -1,33 +1,63 @@
-import { useState } from "react";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+
 import Home from "./pages/Home";
 import MovieDetails from "./pages/MovieDetails";
 import Favorites from "./pages/Favorites";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./pages/ProtectedRoute";
 
 function App() {
-  // Track which page is currently active: "home", "details", or "favorites"
-  const [page, setPage] = useState("home");
-
-  // Store the ID of the movie selected from Home, passed into MovieDetails
-  const [selectedMovieId, setSelectedMovieId] = useState(null);
-
   return (
-    <div>
-      {/* App title */}
-      <h1>ViableVore</h1>
+    <BrowserRouter>
+      <div>
+        <h1>ViableVore</h1>
 
-      {/* Navigation buttons to switch between pages */}
-      <nav>
-        <button onClick={() => setPage("home")}>Home</button>
-        <button onClick={() => setPage("details")}>Details</button>
-        <button onClick={() => setPage("favorites")}>Favorites</button>
-      </nav>
+        <nav>
+          <Link to="/">Home</Link>
+          <Link to="/favorites">Favorites</Link>
+          <Link to="/login">Login</Link>
+          <Link to="/register">Register</Link>
+          <Link to="/dashboard">Dashboard</Link>
+        </nav>
 
-      {/* Conditional rendering based on current page */}
-      {page === "home" && <Home onSelectMovie={setSelectedMovieId} />}
-      {page === "details" && <MovieDetails movieId={selectedMovieId} />}
-      {page === "favorites" && <Favorites />}
-    </div>
+        <Routes>
+          <Route path="/" element={<Home />} />
+
+          <Route
+            path="/movie/:id"
+            element={<MovieDetails />}
+          />
+
+          <Route
+            path="/favorites"
+            element={<Favorites />}
+          />
+
+          <Route
+            path="/login"
+            element={<Login />}
+          />
+
+          <Route
+            path="/register"
+            element={<Register />}
+          />
+
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </div>
+    </BrowserRouter>
   );
 }
 
 export default App;
+
