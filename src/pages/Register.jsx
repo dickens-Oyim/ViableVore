@@ -15,22 +15,31 @@ const Register = () => {
     }
   };
 
-  return (
-    <div>
-      <input
-        placeholder="Email"
-        onChange={(e) => setEmail(e.target.value)}
-      />
+    return (
+      <div className="auth-container">
+        <div className="auth-card">
+          <h2 className="auth-title">Register</h2>
 
-      <input
-        type="password"
-        placeholder="Password"
-        onChange={(e) => setPassword(e.target.value)}
-      />
+          <input
+            className="auth-field"
+            type="email"
+            placeholder="Email"
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-      <button onClick={handleRegister}>Register</button>
-    </div>
-  );
+          <input
+            className="auth-field"
+            type="password"
+            placeholder="Password"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <button className="auth-btn" onClick={handleRegister}>
+            Register
+          </button>
+        </div>
+      </div>
+    );
 };
 
 export default Register;

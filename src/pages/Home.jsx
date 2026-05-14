@@ -1,68 +1,86 @@
 import { useEffect, useState } from "react";
 import { fetchMovieTrailer } from "../api/movieApi";
 import axios from "axios";
-import { searchMovies } from "../services/movieService";
+import { useNavigate } from "react-router-dom";
 
 function Home() {
-  // State to store movies fetched from TMDB
   const [movies, setMovies] = useState([]);
-  // State to store search query input
   const [query, setQuery] = useState("");
-  // State to store trailers keyed by movie ID
   const [trailers, setTrailers] = useState({});
 
-  // Runs once when component mounts
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchAllMovies = async () => {
-      // Fetch movies from TMDB discover endpoint
-      const res = await axios.get("https://api.themoviedb.org/3/discover/movie", {
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_TMDB_READ_TOKEN}`,
-        },
-      });
-      setMovies(res.data.results);
-
-      // Prepare object to store trailers
-      const trailerData = {};
-      // Loop through first 6 movies (limit for performance)
-      for (const m of res.data.results.slice(0, 6)) {
-        // Fetch video list for each movie
-        const videos = await fetchMovieTrailer(m.id);
-        // Find a trailer hosted on YouTube or Vimeo
-        const trailer = videos.find(
-          (v) => v.type === "Trailer" && (v.site === "YouTube" || v.site === "Vimeo")
+      try {
+        // Fetch movies from TMDB
+        const res = await axios.get(
+          "https://api.themoviedb.org/3/discover/movie",
+          {
+            headers: {
+              Authorization: `Bearer ${import.meta.env.VITE_TMDB_READ_TOKEN}`,
+            },
+          }
         );
-        // If found, store trailer key and site by movie ID
-        if (trailer) trailerData[m.id] = { key: trailer.key, site: trailer.site };
+
+        setMovies(res.data.results);
+
+        // Store trailers
+        const trailerData = {};
+
+        // Limit trailer fetches for performance
+        for (const m of res.data.results.slice(0, 6)) {
+          const videos = await fetchMovieTrailer(m.id);
+
+          const trailer = videos.find(
+            (v) =>
+              v.type === "Trailer" &&
+              (v.site === "YouTube" || v.site === "Vimeo")
+          );
+
+          if (trailer) {
+            trailerData[m.id] = {
+              key: trailer.key,
+              site: trailer.site,
+            };
+          }
+        }
+
+        setTrailers(trailerData);
+      } catch (error) {
+        console.error("Error fetching movies:", error);
       }
-      // Save trailers in state
-      setTrailers(trailerData);
     };
+
     fetchAllMovies();
   }, []);
 
-  
-
-
-  //  Search movies
+  // Search movies
   const handleSearch = async (e) => {
     e.preventDefault();
+
     if (!query) return;
-    // Fetch movies matching search query
-    const res = await axios.get(
-      `https://api.themoviedb.org/3/search/movie?query=${query}`,
-      {
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_TMDB_READ_TOKEN}`,
-        },
-      }
-    );
-    setMovies(res.data.results);
+
+    try {
+      const res = await axios.get(
+        `https://api.themoviedb.org/3/search/movie?query=${query}`,
+        {
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_TMDB_READ_TOKEN}`,
+          },
+        }
+      );
+
+      setMovies(res.data.results);
+    } catch (error) {
+      console.error("Search error:", error);
+    }
   };
 
   return (
     <div className="home">
       <h2>Movies</h2>
+
       {/* Search bar */}
       <form onSubmit={handleSearch} className="search-bar">
         <input
@@ -71,21 +89,60 @@ function Home() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
+
         <button type="submit">Search</button>
       </form>
 
-      {/* Movie grid */}
+      {/* Movie Grid */}
       <div className="movie-grid">
         {movies.map((movie) => (
-          <div key={movie.id} className="movie-card">
+          <div
+            key={movie.id}
+            className="movie-card"
+            onClick={() => navigate(`/movie/${movie.id}`)}
+          >
             {/* Poster */}
             <img
-              src={`https://image.tmdb.org/t/p/w300${movie.poster_path}`}
+              src={
+                movie.poster_path
+                  ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
+                  : "https://via.placeholder.com/300x450?text=No+Image"
+              }
               alt={movie.title}
             />
-            <p>{movie.title}</p>
 
-            {/* Trailer embed if available */}
+            <p>{movie.title}</p>
+              <button
+                className="favorite-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  const savedMovies =
+                    JSON.parse(localStorage.getItem("favorites")) || [];
+
+                  const alreadyExists = savedMovies.find(
+                    (m) => m.id === movie.id
+                  );
+
+                  if (alreadyExists) {
+                    alert("Movie already in favorites");
+                    return;
+                  }
+
+                  const updatedFavorites = [...savedMovies, movie];
+
+                  localStorage.setItem(
+                    "favorites",
+                    JSON.stringify(updatedFavorites)
+                  );
+
+                  alert("Added to favorites!");
+                }}
+                >
+                Add to Favorites
+              </button>
+
+            {/* Trailer */}
             {trailers[movie.id] && (
               <div className="trailer-container">
                 {trailers[movie.id].site === "YouTube" ? (
